@@ -4,7 +4,7 @@ const db = require('../db')
 const { cache, clearCache } = require('../cache')
 const { adminOnly } = require('../middleware')
 
-const PUBLIC_SETTINGS = ['max_players', 'spin_count', 'min_prize', 'max_prize', 'admin_wa']
+const PUBLIC_SETTINGS = ['site_enabled', 'max_players', 'spin_count', 'min_prize', 'max_prize', 'admin_wa']
 const ADMIN_SETTINGS = [...PUBLIC_SETTINGS, 'admin_password']
 
 function pickSettings(keys) {

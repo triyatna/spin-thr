@@ -115,7 +115,9 @@ async function register() {
     router.push(`/main/${data.player.token}`);
   } catch (e) {
     const msg = e.response?.data?.error || "Gagal mendaftar.";
-    if (msg.includes("penuh") || e.response?.status === 403) {
+    if (msg.includes("dinonaktifkan")) {
+      router.push("/nonaktif");
+    } else if (msg.includes("penuh")) {
       full.value = true;
     } else {
       error.value = msg;

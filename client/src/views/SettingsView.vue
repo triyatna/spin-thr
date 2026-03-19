@@ -13,6 +13,30 @@
       <div v-if="error" class="alert alert-error">{{ error }}</div>
 
       <div class="field">
+        <label>Status Halaman Publik</label>
+        <div class="toggle-row">
+          <button
+            type="button"
+            class="toggle-btn"
+            :class="{ active: form.site_enabled === '1' }"
+            @click="form.site_enabled = '1'"
+          >
+            Enable
+          </button>
+          <button
+            type="button"
+            class="toggle-btn danger"
+            :class="{ active: form.site_enabled === '0' }"
+            @click="form.site_enabled = '0'"
+          >
+            Disable
+          </button>
+        </div>
+        <small style="color: var(--text-muted)">
+          Saat `Disable`, halaman publik tidak bisa diakses user biasa, tetapi admin yang sudah login tetap bisa membuka halaman pemain.
+        </small>
+      </div>
+      <div class="field">
         <label>Maksimum Pemain</label>
         <input
           v-model.number="form.max_players"
@@ -94,6 +118,7 @@ const router = useRouter();
 const store = useGameStore();
 
 const form = ref({
+  site_enabled: "1",
   max_players: 3,
   spin_count: 6,
   min_prize: 5000,
@@ -110,6 +135,7 @@ onMounted(async () => {
     const data = await store.loadDashboard();
     if (data && data.settings) {
       Object.assign(form.value, data.settings);
+      form.value.site_enabled = data.settings.site_enabled === "0" ? "0" : "1";
       form.value.max_players = parseInt(data.settings.max_players) || 3;
       form.value.spin_count = parseInt(data.settings.spin_count) || 6;
       form.value.min_prize = parseInt(data.settings.min_prize) || 5000;
@@ -138,3 +164,36 @@ async function save() {
   }
 }
 </script>
+
+<style scoped>
+.toggle-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.toggle-btn {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-btn.active {
+  background: rgba(46, 204, 113, 0.16);
+  border-color: rgba(46, 204, 113, 0.5);
+  color: #9df0b7;
+  box-shadow: 0 0 0 1px rgba(46, 204, 113, 0.2) inset;
+}
+
+.toggle-btn.danger.active {
+  background: rgba(255, 68, 68, 0.16);
+  border-color: rgba(255, 68, 68, 0.5);
+  color: #ff9f9f;
+  box-shadow: 0 0 0 1px rgba(255, 68, 68, 0.2) inset;
+}
+</style>

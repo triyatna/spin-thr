@@ -39,6 +39,7 @@ db.exec(`
 `)
 
 const defaults = [
+  ['site_enabled', process.env.DEFAULT_SITE_ENABLED || '1'],
   ['max_players', process.env.DEFAULT_MAX_PLAYERS || '3'],
   ['spin_count', process.env.DEFAULT_SPIN_COUNT || '6'],
   ['min_prize', process.env.DEFAULT_MIN_PRIZE || '5000'],

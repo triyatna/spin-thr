@@ -17,6 +17,7 @@ export const useGameStore = defineStore('game', {
     totalPrize: (state) => state.player?.total_prize ?? 0,
     isFinished: (state) => state.player?.finished === 1,
     isAdmin: (state) => !!state.token,
+    isSiteEnabled: (state) => String(state.settings.site_enabled ?? '1') !== '0',
     authHeaders: (state) => ({ Authorization: `Bearer ${state.token}` })
   },
 
@@ -59,13 +60,15 @@ export const useGameStore = defineStore('game', {
     },
 
     async registerPlayer(payload) {
-      const { data } = await axios.post('/api/players/register', payload)
+      const config = this.token ? { headers: this.authHeaders } : undefined
+      const { data } = await axios.post('/api/players/register', payload, config)
       this.player = data.player
       return data
     },
 
     async loadPlayerByToken(token) {
-      const { data } = await axios.get(`/api/players/by-token/${token}`)
+      const config = this.token ? { headers: this.authHeaders } : undefined
+      const { data } = await axios.get(`/api/players/by-token/${token}`, config)
       this.player = data.player
       this.spinHistory = data.spins
       return data
@@ -75,7 +78,8 @@ export const useGameStore = defineStore('game', {
       this.isSpinning = true
       this.error = null
       try {
-        const { data } = await axios.post(`/api/spin/${token}`)
+        const config = this.token ? { headers: this.authHeaders } : undefined
+        const { data } = await axios.post(`/api/spin/${token}`, {}, config)
         this.lastSpinResult = data
         this.player = data.player
         this.spinHistory.push(data)

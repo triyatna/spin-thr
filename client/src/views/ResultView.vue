@@ -197,6 +197,10 @@ onMounted(async () => {
     spinHistory.value = data.spins;
     await store.loadSettings();
   } catch (e) {
+    if (e.response?.status === 403) {
+      const msg = e.response?.data?.error || "";
+      if (msg.includes("dinonaktifkan")) return router.push("/nonaktif");
+    }
     if (e.response?.status === 404) router.push("/daftar");
   }
 });

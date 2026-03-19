@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const crypto = require('crypto')
 const db = require('../db')
-const { adminOnly } = require('../middleware')
+const { adminOnly, siteEnabledOrAdmin } = require('../middleware')
 const { cache, clearCache } = require('../cache')
 
 router.get('/', adminOnly, (req, res) => {
@@ -15,7 +15,7 @@ router.get('/', adminOnly, (req, res) => {
   res.json(players)
 })
 
-router.get('/by-token/:token', (req, res) => {
+router.get('/by-token/:token', siteEnabledOrAdmin, (req, res) => {
   const token = req.params.token
   const cacheKey = `player_${token}`
   const cached = cache.get(cacheKey)
@@ -45,7 +45,7 @@ router.get('/:id', adminOnly, (req, res) => {
   res.json(data)
 })
 
-router.post('/register', (req, res) => {
+router.post('/register', siteEnabledOrAdmin, (req, res) => {
   const { name, ewallet_type, ewallet_number } = req.body
   if (!name || !ewallet_type || !ewallet_number) {
     return res.status(400).json({ error: 'Semua field wajib diisi' })

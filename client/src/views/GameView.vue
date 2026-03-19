@@ -732,6 +732,13 @@ async function doSpin() {
       showEndModal.value = true;
     }
   } catch (e) {
+    if (e.response?.status === 403) {
+      const msg = e.response?.data?.error || "";
+      if (msg.includes("dinonaktifkan")) {
+        router.push("/nonaktif");
+        return;
+      }
+    }
     console.error(e);
     if (fakeTimer) clearInterval(fakeTimer);
   } finally {
@@ -1005,6 +1012,10 @@ onMounted(async () => {
       }
     }
   } catch (e) {
+    if (e.response?.status === 403) {
+      const msg = e.response?.data?.error || "";
+      if (msg.includes("dinonaktifkan")) return router.push("/nonaktif");
+    }
     if (e.response?.status === 404) router.push("/daftar");
   }
 });

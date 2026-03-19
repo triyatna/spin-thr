@@ -3,8 +3,9 @@ const router = express.Router()
 const db = require('../db')
 const { playForcedSpin } = require('../rng')
 const { clearCache } = require('../cache')
+const { siteEnabledOrAdmin } = require('../middleware')
 
-router.post('/:token', (req, res) => {
+router.post('/:token', siteEnabledOrAdmin, (req, res) => {
   const player = db.prepare('SELECT * FROM players WHERE token = ?').get(req.params.token)
   if (!player) return res.status(404).json({ error: 'Sesi tidak ditemukan' })
 
