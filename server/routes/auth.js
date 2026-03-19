@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
 const db = require('../db')
 
 const JWT_SECRET = process.env.JWT_SECRET || 'thr-spin-secret-2026'
@@ -10,7 +11,16 @@ router.post('/login', (req, res) => {
   const stored = db.prepare("SELECT value FROM settings WHERE key = 'admin_password'").get()
   const adminPass = stored?.value || 'admin123'
 
-  if (password !== adminPass) {
+  const a = Buffer.from(password || '')
+  const b = Buffer.from(adminPass)
+  let valid = false
+  if (a.length === b.length) {
+    valid = crypto.timingSafeEqual(a, b)
+  } else {
+    crypto.timingSafeEqual(b, b)
+  }
+
+  if (!valid) {
     return res.status(401).json({ error: 'Password salah!' })
   }
 
