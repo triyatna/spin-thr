@@ -84,6 +84,44 @@ docker compose up -d
 
 _(Ini akan membangun Image Node:18-Alpine yang teroptimasi, menjalankan `npm install:all`, menyalin aset, hingga menyatukan server)_.
 
+### 4. Menambahkan Domain Kustom (Nginx Reverse Proxy)
+
+Oleh karena aplikasi ini berjalan secara merangkap Monolitik di peladen lokal (Port bawaan `.env` = `3001`), menautkan Domain Publik sangatlah gampang. Anda cukup menggunakan fitur *Reverse Proxy* milik ekosistem Nginx atau sejenisnya.
+
+Di file blok peladen Nginx (`/etc/nginx/sites-available/...`), salin pola dasar berikut:
+
+```nginx
+server {
+    listen 80;
+    server_name thr.domain-anda.com; # Ganti dengan domain asli Anda
+
+    location / {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+_Tip: Setelah Nginx dimuat ulang (`sudo systemctl reload nginx`), jalankan Certbot SSL (`sudo certbot --nginx`) agar URL langsung memuat jalur aman `HTTPS`!_
+
+#### Alternatif: Menggunakan Apache (VirtualHost)
+
+Jika peladen Anda menggunakan Apache, pastikan modul *proxy* telah aktif (`sudo a2enmod proxy proxy_http`), lalu buat konfigurasi blok berikut:
+
+```apache
+<VirtualHost *:80>
+    ServerName thr.domain-anda.com # Ganti dengan domain asli Anda
+
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:3001/
+    ProxyPassReverse / http://127.0.0.1:3001/
+</VirtualHost>
+```
+
 ---
 
 ## 🛠️ Stack Teknologi
