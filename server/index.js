@@ -1,3 +1,4 @@
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') })
 const express = require('express')
 const cors = require('cors')
 const rateLimit = require('express-rate-limit')
@@ -7,9 +8,10 @@ const playersRoutes = require('./routes/players')
 const spinRoutes = require('./routes/spin')
 const dashboardRoutes = require('./routes/dashboard')
 const { adminOnly } = require('./middleware')
+const path = require('path')
 
 const app = express()
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 
 app.set('trust proxy', 1)
 
@@ -53,6 +55,21 @@ app.use('/api/players', playersRoutes)
 app.use('/api/spin', spinRoutes)
 app.use('/api/dashboard', adminOnly, dashboardRoutes)
 
+// ==========================================
+// SMART PRODUCTION DEPLOYMENT CONFIGURATION
+// ==========================================
+// Jika dijalankan di server production (VPS/Panel/Hosting)
+// Server akan otomatis menyajikan file build dari Vue Front-End (client/dist)
+// Dalam satu domain dan port yang sama tanpa bentrok CORS!
+const clientDistPath = path.join(__dirname, '../client/dist')
+app.use(express.static(clientDistPath))
+
+// Fallback untuk Vue Router (SPA History Mode)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientDistPath, 'index.html'))
+})
+
 app.listen(PORT, () => {
-  console.log(`THR Slot Server running on http://localhost:${PORT}`)
+  console.log(`THR Slot API Server running on port ${PORT}`)
+  console.log(`Front-End tersinkronisasi otomatis (jika ada di client/dist)`)
 })

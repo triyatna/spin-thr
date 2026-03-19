@@ -1,3 +1,4 @@
+require('dotenv').config({ path: require('path').join(__dirname, '.env') })
 const Database = require('better-sqlite3')
 const path = require('path')
 
@@ -38,12 +39,12 @@ db.exec(`
 `)
 
 const defaults = [
-  ['max_players', '3'],
-  ['spin_count', '6'],
-  ['min_prize', '5000'],
-  ['max_prize', '20000'],
-  ['admin_wa', ''],
-  ['admin_password', 'admin123'],
+  ['max_players', process.env.DEFAULT_MAX_PLAYERS || '3'],
+  ['spin_count', process.env.DEFAULT_SPIN_COUNT || '6'],
+  ['min_prize', process.env.DEFAULT_MIN_PRIZE || '5000'],
+  ['max_prize', process.env.DEFAULT_MAX_PRIZE || '20000'],
+  ['admin_wa', process.env.DEFAULT_ADMIN_WA || ''],
+  ['admin_password', process.env.DEFAULT_ADMIN_PASSWORD || 'admin123'],
 ]
 
 const insertSetting = db.prepare(

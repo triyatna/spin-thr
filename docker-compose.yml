@@ -1,0 +1,15 @@
+# Docker Compose File for Spin THR
+version: '3.8'
+
+services:
+  spin-thr:
+    build: .
+    container_name: spin-thr-app
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+    # Uncomment lines below to persist the SQLite database properly
+    # volumes:
+    #   - ./server/thr.db:/app/server/thr.db

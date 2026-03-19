@@ -1,4 +1,9 @@
-/node_modules
-/server/node_modules
-/client/node_modules
+node_modules/
+.env
+.env.*
+client/dist/
+dist/
 /server/thr.db
+/server/thr.db-shm
+/server/thr.db-wal
+.DS_Store

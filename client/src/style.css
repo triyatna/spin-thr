@@ -58,7 +58,7 @@ body {
       transparent 50%
     ),
     linear-gradient(rgba(10, 26, 13, 0.88), rgba(10, 26, 13, 0.88)),
-    url('/logo-hariraya.jpg') center/250px no-repeat fixed,
+    url('/logo-hariraya.png') center/250px no-repeat fixed,
     var(--bg-deep);
 }
 
@@ -471,7 +471,7 @@ body {
       transparent 70%
     ),
     linear-gradient(rgba(10, 26, 13, 0.90), rgba(10, 26, 13, 0.90)),
-    url('/logo-hariraya.jpg') center/250px no-repeat fixed,
+    url('/logo-hariraya.png') center/250px no-repeat fixed,
     var(--bg-deep);
   display: flex;
   flex-direction: column;
