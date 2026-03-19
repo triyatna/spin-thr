@@ -44,7 +44,7 @@ export const useGameStore = defineStore('game', {
     },
 
     async loadSettings() {
-      const { data } = await axios.get('/api/settings', { headers: this.authHeaders })
+      const { data } = await axios.get('/api/settings')
       this.settings = data
     },
 

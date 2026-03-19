@@ -50,7 +50,7 @@ app.use('/api/spin', spinLimiter)
 
 app.use('/api/auth', authRoutes)
 
-app.use('/api/settings', adminOnly, settingsRoutes)
+app.use('/api/settings', settingsRoutes)
 app.use('/api/players', playersRoutes)
 app.use('/api/spin', spinRoutes)
 app.use('/api/dashboard', adminOnly, dashboardRoutes)
