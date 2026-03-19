@@ -13,24 +13,62 @@
         </div>
       </div>
 
-      <div class="total-reward-badge">
-        <div class="label">Total Reward</div>
-        <div class="amount">Rp {{ displayPrize.toLocaleString("id") }}</div>
+      <div style="display: flex; gap: 8px">
+        <button class="info-btn" @click="toggleAudio" title="Musik Latar">
+          {{ isMuted ? "🔇" : "🔊" }}
+        </button>
+        <button
+          class="info-btn"
+          @click="showInfoModal = true"
+          id="btn-info"
+          title="Info"
+        >
+          ℹ️
+        </button>
       </div>
-
-      <button
-        class="info-btn"
-        @click="showInfoModal = true"
-        id="btn-info"
-        title="Info"
-      >
-        ℹ️
-      </button>
     </div>
 
     <div class="game-title-bar">
-      <div class="game-title">🌙 SPIN THR LEBARAN 🌙</div>
-      <div class="game-title-deco">✦ PUTAR &amp; MENANGKAN THR ✦</div>
+      <img
+        src="/logo-hariraya.png"
+        alt="Logo"
+        class="main-logo"
+        style="
+          max-height: 55px;
+          margin-bottom: 4px;
+          border-radius: 10px;
+          filter: drop-shadow(0 0 12px rgba(240, 192, 64, 0.6));
+          animation: float 3s ease-in-out infinite;
+        "
+      />
+      <div
+        class="game-title"
+        style="font-size: clamp(1.1rem, 3.5vw, 1.6rem); padding-bottom: 2px"
+      >
+        SPIN THR LEBARAN
+      </div>
+      <div
+        class="game-title-deco"
+        style="font-size: 0.75rem; letter-spacing: 2px; margin-top: 0"
+      >
+        ✦ PUTAR &amp; MENANGKAN THR ✦
+      </div>
+    </div>
+
+    <div
+      class="total-reward-container"
+      style="
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 8px;
+        z-index: 1;
+      "
+    >
+      <div class="total-reward-badge center-badge">
+        <div class="label">Total Reward</div>
+        <div class="amount">Rp {{ displayPrize.toLocaleString("id") }}</div>
+      </div>
     </div>
 
     <div class="slot-wrapper" ref="slotWrapper">
@@ -123,7 +161,7 @@
         {{ spinning ? "⏳ Memutar..." : finished ? "✅ SELESAI" : "🎰 SPIN!" }}
       </button>
     </div>
-
+    <br />
     <div class="spin-log" v-if="spinHistory.length > 0">
       <div
         v-for="s in spinHistory"
@@ -273,15 +311,24 @@
     </transition>
 
     <transition name="fade">
-      <div
-        class="overlay"
-        v-if="winModal.show"
-        @click.self="closeWinModal"
-      >
+      <div class="overlay" v-if="winModal.show" @click.self="closeWinModal">
         <div class="win-modal">
-          <span class="win-label" :class="{ 'zonk-text': winModal.amount === 0 }">{{ winModal.label }}</span>
-          <div class="win-amount" :style="winModal.amount === 0 ? 'color: var(--accent-red); margin-top: 10px;' : ''">
-            <span v-if="winModal.amount > 0">🎉 Rp {{ winModal.amount.toLocaleString("id") }}</span>
+          <span
+            class="win-label"
+            :class="{ 'zonk-text': winModal.amount === 0 }"
+            >{{ winModal.label }}</span
+          >
+          <div
+            class="win-amount"
+            :style="
+              winModal.amount === 0
+                ? 'color: var(--accent-red); margin-top: 10px;'
+                : ''
+            "
+          >
+            <span v-if="winModal.amount > 0"
+              >🎉 Rp {{ winModal.amount.toLocaleString("id") }}</span
+            >
             <span v-else>Rp 0</span>
           </div>
           <div class="win-sub">pada Spin #{{ winModal.spinNo }}</div>
@@ -335,11 +382,97 @@
         </div>
       </div>
     </transition>
+
+    <transition name="fade">
+      <div class="overlay" v-if="showWelcomeModal" style="z-index: 200">
+        <div class="info-modal welcome-modal">
+          <div
+            class="info-modal-title"
+            style="font-size: 1.6rem; margin-bottom: 12px"
+          >
+            🎉 Halo, {{ player?.name }}!
+          </div>
+          <p
+            style="
+              text-align: center;
+              color: var(--text-muted);
+              margin-bottom: 24px;
+              font-size: 0.95rem;
+            "
+          >
+            Selamat datang di <b>SPIN THR Lebaran</b>. Ini panduan cara
+            bermainnya:
+          </p>
+
+          <div
+            class="welcome-steps"
+            style="position: relative; overflow: hidden; text-align: center"
+          >
+            <div v-show="welcomeStep === 1" class="step-slide">
+              <div class="step-icon">🎰</div>
+              <div class="step-title">1. Putar Mesinnya</div>
+              <p class="step-desc">
+                Klik tombol <b>SPIN!</b> untuk mengacak simbol pada grid 5x6.
+                Kamu punya <b>{{ spinsTotal }} putaran awal</b> (bisa bertambah
+                jika dapat Free Spin!).
+              </p>
+            </div>
+            <div v-show="welcomeStep === 2" class="step-slide">
+              <div class="step-icon">💥</div>
+              <div class="step-title">2. Kumpulkan Cluster</div>
+              <p class="step-desc">
+                Cocokkan minimal <b>4 simbol yang sama</b> secara horizontal
+                atau vertikal untuk memenangkan hadiah. Makin besar cluster,
+                makin besar THR!
+              </p>
+            </div>
+            <div v-show="welcomeStep === 3" class="step-slide">
+              <div class="step-icon">✖️</div>
+              <div class="step-title">3. Tumble & Multiplier</div>
+              <p class="step-desc">
+                Simbol kemenangan akan pecah & simbol baru akan jatuh. Setiap
+                jatuhan beruntun akan
+                <b>meningkatkan multiplier x2, x3, dst!</b>
+              </p>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 24px">
+            <button
+              class="btn btn-sm"
+              style="
+                background: var(--bg-cell);
+                border: 1px solid rgba(46, 204, 113, 0.3);
+                color: var(--text-main);
+                flex: 0.6;
+              "
+              @click="welcomeStep--"
+              :disabled="welcomeStep === 1"
+            >
+              Sebelumnya
+            </button>
+            <button
+              class="btn btn-gold"
+              @click="welcomeStep < 3 ? welcomeStep++ : closeWelcomeModal()"
+              style="flex: 1"
+            >
+              {{ welcomeStep < 3 ? "Selanjutnya" : "Mulai Permainan! 🚀" }}
+            </button>
+          </div>
+
+          <div class="welcome-dots">
+            <span :class="{ active: welcomeStep === 1 }"></span>
+            <span :class="{ active: welcomeStep === 2 }"></span>
+            <span :class="{ active: welcomeStep === 3 }"></span>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useGameStore } from "@/store/game";
 
@@ -372,6 +505,31 @@ const spinning = ref(false);
 const displayPrize = ref(0);
 const lastSpinPrize = ref(null);
 const showInfoModal = ref(false);
+const showWelcomeModal = ref(false);
+const welcomeStep = ref(1);
+
+const audio = new window.Audio("/audio/lebaran.mp3");
+audio.loop = true;
+const isMuted = ref(false);
+
+function toggleAudio() {
+  isMuted.value = !isMuted.value;
+  if (isMuted.value) audio.pause();
+  else
+    audio.play().catch((e) => console.log("Autoplay di-block oleh browser", e));
+}
+
+function closeWelcomeModal() {
+  showWelcomeModal.value = false;
+  if (!isMuted.value) {
+    audio.play().catch(() => console.log("Autoplay ditunda sampai interaksi."));
+  }
+}
+
+onBeforeUnmount(() => {
+  audio.pause();
+  audio.currentTime = 0;
+});
 
 const landingCells = ref(new Set());
 const winningCells = ref(new Set());
@@ -428,6 +586,10 @@ function cellStyle(idx) {
 
 async function doSpin() {
   if (finished.value || spinning.value) return;
+
+  if (audio.paused && !isMuted.value) {
+    audio.play().catch(() => {});
+  }
 
   spinning.value = true;
   lastSpinPrize.value = null;
@@ -635,13 +797,16 @@ function showBurstTexts(clusters) {
     const x = rect.left - wrapRect.left + avgC * cellW + cellW / 2;
     const y = rect.top - wrapRect.top + avgR * cellH + cellH / 2;
     const prize = getClusterPrize(cl);
-    
+
     if (prize > 0) {
       const padX = 85;
       const padYTop = 75;
       const padYBottom = 30;
       const textX = Math.max(padX, Math.min(x, wrapRect.width - padX));
-      const textY = Math.max(padYTop, Math.min(y, wrapRect.height - padYBottom));
+      const textY = Math.max(
+        padYTop,
+        Math.min(y, wrapRect.height - padYBottom),
+      );
 
       burstTexts.value.push({
         id: burstId++,
@@ -708,7 +873,7 @@ let modalResolve = null;
 
 function showWinModal(label, amount, spinNo) {
   winModal.value = { show: true, label, amount, spinNo };
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     modalResolve = resolve;
   });
 }
@@ -824,6 +989,8 @@ onMounted(async () => {
     }));
     finished.value = !!data.player.finished;
     if (data.player.finished) showEndModal.value = true;
+    else if (spinsUsed.value === 0) showWelcomeModal.value = true;
+
     if (data.spins.length > 0) {
       try {
         const lastSpin = data.spins[data.spins.length - 1];
@@ -844,6 +1011,49 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.welcome-modal {
+  max-width: 440px !important;
+  text-align: center;
+}
+.step-slide {
+  animation: slide-up 0.4s ease forwards;
+  padding: 10px 0;
+}
+.step-icon {
+  font-size: 4.5rem;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 16px rgba(240, 192, 64, 0.4));
+}
+.step-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+  margin-bottom: 12px;
+}
+.step-desc {
+  font-size: 1rem;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+.welcome-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+.welcome-dots span {
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+.welcome-dots span.active {
+  background: var(--accent-gold);
+  width: 20px;
+  border-radius: 4px;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s;

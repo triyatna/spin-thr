@@ -2,7 +2,7 @@
   <div class="page">
     <div class="card">
       <div class="logo-header">
-        <span class="emoji">🎊</span>
+        <img src="/logo-hariraya.png" alt="Logo" class="main-logo" />
         <h1>DAFTAR SEKARANG</h1>
         <p>Masukkan data kamu untuk menerima hadiah THR!</p>
       </div>
