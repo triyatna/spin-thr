@@ -88,6 +88,8 @@ _(Ini akan membangun Image Node:18-Alpine yang teroptimasi, menjalankan `npm ins
 
 Oleh karena aplikasi ini berjalan secara merangkap Monolitik di peladen lokal (Port bawaan `.env` = `3001`), menautkan Domain Publik sangatlah gampang. Anda cukup menggunakan fitur *Reverse Proxy* milik ekosistem Nginx atau sejenisnya.
 
+Sebelum mengatur *reverse proxy*, pastikan DNS domain/subdomain Anda sudah mengarah ke IP server (misalnya melalui record `A` atau `CNAME`).
+
 Di file blok peladen Nginx (`/etc/nginx/sites-available/...`), salin pola dasar berikut:
 
 ```nginx
@@ -107,6 +109,34 @@ server {
 ```
 
 _Tip: Setelah Nginx dimuat ulang (`sudo systemctl reload nginx`), jalankan Certbot SSL (`sudo certbot --nginx`) agar URL langsung memuat jalur aman `HTTPS`!_
+
+#### Alternatif: Menggunakan Caddy
+
+Jika Anda memakai Caddy, konfigurasi domain kustom justru lebih ringkas karena sertifikat HTTPS bisa diurus otomatis selama DNS domain sudah mengarah ke server.
+
+Di file `Caddyfile` (umumnya di `/etc/caddy/Caddyfile`), gunakan pola berikut:
+
+```caddy
+thr.domain-anda.com {
+    reverse_proxy 127.0.0.1:3001
+}
+```
+
+Jika ingin sekaligus melayani domain utama dan subdomain `www`, gunakan contoh ini:
+
+```caddy
+domain-anda.com, www.domain-anda.com {
+    reverse_proxy 127.0.0.1:3001
+}
+```
+
+Setelah itu, muat ulang konfigurasi Caddy:
+
+```bash
+sudo systemctl reload caddy
+```
+
+_Tip: Bila Caddy berjalan normal dan port `80/443` terbuka, HTTPS biasanya akan aktif otomatis tanpa perlu Certbot tambahan._
 
 #### Alternatif: Menggunakan Apache (VirtualHost)
 
