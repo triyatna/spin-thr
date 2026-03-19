@@ -2,6 +2,12 @@
   "name": "spin-thr",
   "version": "1.0.0",
   "private": true,
+  "author": "Tri Yatna",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/triyatna/spin-thr"
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "npm run dev --workspace=server",

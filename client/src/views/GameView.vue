@@ -276,20 +276,21 @@
       <div
         class="overlay"
         v-if="winModal.show"
-        @click.self="winModal.show = false"
+        @click.self="closeWinModal"
       >
         <div class="win-modal">
-          <span class="win-label">{{ winModal.label }}</span>
-          <div class="win-amount">
-            🎉 Rp {{ winModal.amount.toLocaleString("id") }}
+          <span class="win-label" :class="{ 'zonk-text': winModal.amount === 0 }">{{ winModal.label }}</span>
+          <div class="win-amount" :style="winModal.amount === 0 ? 'color: var(--accent-red); margin-top: 10px;' : ''">
+            <span v-if="winModal.amount > 0">🎉 Rp {{ winModal.amount.toLocaleString("id") }}</span>
+            <span v-else>Rp 0</span>
           </div>
           <div class="win-sub">pada Spin #{{ winModal.spinNo }}</div>
           <button
             class="btn btn-gold"
-            @click="winModal.show = false"
+            @click="closeWinModal"
             id="btn-modal-close"
           >
-            Lanjutkan Spin!
+            Lanjutkan
           </button>
         </div>
       </div>
@@ -545,24 +546,28 @@ async function doSpin() {
     gimmick.value.show = false;
     finished.value = result.finished;
 
-    if (result.finished) {
-      await sleep(600);
-      checkEndWin({ spinNumber: result.spinNumber });
-      await sleep(800);
-      showEndModal.value = true;
-    } else {
-      if (result.prize >= 15000) {
-        showWinModal(
-          result.prize >= parseInt(store.settings.max_prize || 25000)
-            ? "MEGA WIN! 🔥"
-            : "BIG WIN! 🚀",
-          result.prize,
-          result.spinNumber,
-        );
+    await sleep(400);
+
+    if (!result.finished) {
+      if (result.prize >= parseInt(store.settings.max_prize || 25000)) {
         launchConfetti(200);
-      } else if (result.prize >= 5000) {
-        launchConfetti(80);
+        await showWinModal("MEGA WIN! 🔥", result.prize, result.spinNumber);
+      } else if (result.prize >= 15000) {
+        launchConfetti(150);
+        await showWinModal("BIG WIN! 🚀", result.prize, result.spinNumber);
+      } else if (result.prize > 0) {
+        if (result.prize >= 5000) launchConfetti(80);
+        await showWinModal("NICE SPIN! 🎉", result.prize, result.spinNumber);
+      } else {
+        await showWinModal("YAH ZONK! 💀", 0, result.spinNumber);
       }
+    }
+
+    if (result.finished) {
+      await sleep(400);
+      await checkEndWin({ spinNumber: result.spinNumber });
+      await sleep(400);
+      showEndModal.value = true;
     }
   } catch (e) {
     console.error(e);
@@ -630,11 +635,18 @@ function showBurstTexts(clusters) {
     const x = rect.left - wrapRect.left + avgC * cellW + cellW / 2;
     const y = rect.top - wrapRect.top + avgR * cellH + cellH / 2;
     const prize = getClusterPrize(cl);
+    
     if (prize > 0) {
+      const padX = 85;
+      const padYTop = 75;
+      const padYBottom = 30;
+      const textX = Math.max(padX, Math.min(x, wrapRect.width - padX));
+      const textY = Math.max(padYTop, Math.min(y, wrapRect.height - padYBottom));
+
       burstTexts.value.push({
         id: burstId++,
-        x,
-        y,
+        x: textX,
+        y: textY,
         text: "+Rp " + prize.toLocaleString("id"),
       });
       createExplosionParticles(x, y);
@@ -692,18 +704,30 @@ function showGimmick(type, text, sub = "") {
   }, 2200);
 }
 
+let modalResolve = null;
+
 function showWinModal(label, amount, spinNo) {
   winModal.value = { show: true, label, amount, spinNo };
+  return new Promise(resolve => {
+    modalResolve = resolve;
+  });
+}
+
+function closeWinModal() {
+  winModal.value.show = false;
+  if (modalResolve) {
+    modalResolve();
+    modalResolve = null;
+  }
 }
 
 function checkEndWin(lastResult) {
   if (totalPrize.value >= parseInt(store.settings.max_prize || 20000)) {
-    showWinModal("MEGA WIN! 🔥🔥🔥", totalPrize.value, lastResult.spinNumber);
-    launchConfetti(120);
+    launchConfetti(150);
   } else if (totalPrize.value >= 10000) {
-    showWinModal("BIG WIN! 🎉", totalPrize.value, lastResult.spinNumber);
-    launchConfetti(60);
+    launchConfetti(80);
   }
+  return Promise.resolve();
 }
 
 function shakeGrid() {
